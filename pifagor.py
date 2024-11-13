@@ -23,13 +23,13 @@ NUMBER_KEYBOARD_HI = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
 class Number():
     def __init__(self,
                  value=0,
-                 coordinate=(SCREEN_WIDTH/3-10, SCREEN_HEIGHT/2-HEIGH_NUM/2)
-                 ):
+                 coordinate=(SCREEN_WIDTH/3-10, SCREEN_HEIGHT/2-HEIGH_NUM/2),
+                 color=TEXT_COLOR):
         self.value = value
         self.coordinate = coordinate
         self.height_number = HEIGH_NUM
         self.time_ansver = None
-        self.color = TEXT_COLOR
+        self.color = color
         self.len_num = len(str(value))
 
     def delta(self, x=0, y=0):
@@ -99,6 +99,9 @@ def main():
     num_2.delta(80)
     sign_equal.delta(120)
     answer.delta(160)
+    check_text = Number('Правильно', color=(255, 0, 0))
+    check_text.delta(-40, - check_text.height_number - 10)
+    check_text_answer = Number('')
     task = [num_1, sign_multiply, num_2, sign_equal, answer]
     display_write(screen, task)
     while True:
@@ -106,7 +109,21 @@ def main():
         if h_k:
             print(h_k)
         if h_k and int(h_k) == -1:
+            if int(num_1.value) * int(num_2.value) == int(answer.value):
+                check_text.value = 'Правильно!'
+                check_text.color = (0,128,0)
+                time_delay = 1000
+            else:
+                check_text.value = f'НЕ Правильно!'
+                check_text.color = (255, 0, 0)
+                combinations_numbers.append(pop_num)
+                time_delay = 2000
+            check_text_answer.value += f'{num_1.value} x {num_2.value} = '
+            check_text_answer.value += str(int(num_1.value) * int(num_2.value))    
+            display_write(screen, [check_text, check_text_answer])
+            pygame.time.delay(time_delay)
             display_clear(screen)
+            check_text_answer.value = ''
             pop_num = combinations_numbers.pop()
             num_1.value = pop_num[0]
             num_2.value = pop_num[1]
