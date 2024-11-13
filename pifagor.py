@@ -1,4 +1,4 @@
-# import os
+import time
 import pygame
 from itertools import combinations
 from random import shuffle
@@ -14,6 +14,10 @@ TIME_LIMIT_ANSWER = 4
 DELTA_X = 30
 # Высота шрифта.
 HEIGH_NUM = 80
+# Зелёный
+GREEN = (0, 128, 0)
+# Красный
+RED = (255, 0, 0)
 
 NUMBER_KEYBOARD = [1073741922, 1073741913, 1073741914, 1073741915, 1073741916,
                    1073741917, 1073741918, 1073741919, 1073741920, 1073741921]
@@ -28,15 +32,11 @@ class Number():
         self.value = value
         self.coordinate = coordinate
         self.height_number = HEIGH_NUM
-        self.time_ansver = None
         self.color = color
         self.len_num = len(str(value))
 
     def delta(self, x=0, y=0):
         self.coordinate = (self.coordinate[0]+x, self.coordinate[1]+y)
-
-    def answer_time(self, start_time, stop_time):
-        self.time_ansver = stop_time - start_time
 
     def draw(self, screen):
         """Вывод текста на экран."""
@@ -85,16 +85,20 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption('Пифагоровы штаны')
 
-    set_stop_numbers = [2, 4]
-    set_of_numbers = [x for x in range(1, 9) if x not in set_stop_numbers]
+    set_stop_numbers = [2]
+    set_of_numbers = [x for x in range(2, 10) if x not in set_stop_numbers]*2
+    print(set_of_numbers)
     combinations_numbers = list(combinations(set_of_numbers, 2))
     shuffle(combinations_numbers)
-    pop_num = combinations_numbers[0]
+    pop_num = combinations_numbers.pop(0)
     num_1 = Number(pop_num[0])
     sign_multiply = Number('x')
     num_2 = Number(pop_num[1])
     sign_equal = Number('=')
     answer = Number('?')
+    count_question = Number(f'Осталось примеров: {len(combinations_numbers)}',
+                            (SCREEN_WIDTH - 260, 10))
+    count_question.height_number = 30
     sign_multiply.delta(40)
     num_2.delta(80)
     sign_equal.delta(120)
@@ -102,21 +106,26 @@ def main():
     check_text = Number('Правильно', color=(255, 0, 0))
     check_text.delta(-40, - check_text.height_number - 10)
     check_text_answer = Number('')
-    task = [num_1, sign_multiply, num_2, sign_equal, answer]
+    task = [num_1, sign_multiply, num_2, sign_equal, answer, count_question]
     display_write(screen, task)
+    start_time = time.time()
     while True:
         h_k = handle_keys()
-        if h_k:
-            print(h_k)
         if h_k and int(h_k) == -1:
+            print(combinations_numbers)
             if int(num_1.value) * int(num_2.value) == int(answer.value):
                 check_text.value = 'Правильно!'
-                check_text.color = (0,128,0)
+                check_text.color = GREEN
                 time_delay = 1000
+                print(time.time() - start_time)
+                if time.time() - start_time > TIME_LIMIT_ANSWER:
+                    combinations_numbers.append(pop_num)
+                    print('append')
             else:
-                check_text.value = f'НЕ Правильно!'
-                check_text.color = (255, 0, 0)
+                check_text.value = 'НЕ Правильно!'
+                check_text.color = RED
                 combinations_numbers.append(pop_num)
+                print('append')
                 time_delay = 2000
             check_text_answer.value += f'{num_1.value} x {num_2.value} = '
             check_text_answer.value += str(int(num_1.value) * int(num_2.value))    
@@ -124,11 +133,14 @@ def main():
             pygame.time.delay(time_delay)
             display_clear(screen)
             check_text_answer.value = ''
-            pop_num = combinations_numbers.pop()
+            count_question.value = 'Осталось примеров: '
+            count_question.value += str(len(combinations_numbers))
+            pop_num = combinations_numbers.pop(0)
             num_1.value = pop_num[0]
             num_2.value = pop_num[1]
             answer.value = '?'
             display_write(screen, task)
+            start_time = time.time()
         if h_k and int(h_k) >= 0:
             if answer.value.isdigit():
                 answer.value += h_k
