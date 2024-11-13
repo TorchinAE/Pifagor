@@ -55,6 +55,10 @@ def handle_keys() -> None:
         if event.type == pygame.QUIT:
             pygame.quit()
             raise SystemExit
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            mouse_pos = pygame.mouse.get_pos()
+            if button_rect.collidepoint(mouse_pos):
+                print("Кнопка была нажата!")
         elif event.type == pygame.KEYDOWN:
             if event.key in (NUMBER_KEYBOARD_HI):
                 pressed_digit = pygame.key.name(event.key)
@@ -73,18 +77,33 @@ def display_clear(screen) -> None:
     pygame.display.update()
 
 
-def display_write(screen, arr_num):
+def display_write(screen, arr_num: list):
     display_clear(screen)
     for x in arr_num:
         x.draw(screen)
 
+
+def button_draw(screen, name, coord,
+                button_width=50, button_height=50):
+    button_color = (255, 0, 0)  # Красный цвет
+    button_rect = pygame.Rect(coord[0], coord[1], button_width, button_height)
+    pygame.draw.rect(screen, button_color, button_rect)  # Рисуем кнопку
+
+    # Определяем шрифт и текст кнопки
+    font = pygame.font.Font(None, 36) 
+    text = font.render(name, True, (255, 255, 255)) 
+    text_rect = text.get_rect(center=button_rect.center) 
+    screen.blit(text, text_rect)
+    pygame.display.update()
 
 def main():
     # Настройка игрового окна:
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption('Пифагоровы штаны')
-
+    for x in range(1,10):
+        button_draw(screen, str(x), (x*60, SCREEN_HEIGHT - 80))
+    pygame.time.delay(2000)
     set_stop_numbers = [2]
     set_of_numbers = [x for x in range(2, 10) if x not in set_stop_numbers]*2
     print(set_of_numbers)
