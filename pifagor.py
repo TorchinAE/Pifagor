@@ -100,13 +100,16 @@ def handle_keys() -> None:
             """ if button_rect.collidepoint(mouse_pos):
                 print("Кнопка была нажата!")"""
         elif event.type == pygame.KEYDOWN:
+            print(pygame.key.name(event.key) )
             if event.key in (NUMBER_KEYBOARD_HI):
                 pressed_digit = pygame.key.name(event.key)
             elif event.key in NUMBER_KEYBOARD:
                 pressed_digit = pygame.key.name(event.key)[1]
+            elif pygame.key.name(event.key) == 'backspace':
+                pressed_digit = 'backspace'
             elif (pygame.key.name(event.key) == 'enter' or
                   pygame.key.name(event.key) == 'return'):
-                pressed_digit = -1
+                pressed_digit = 'enter'
     return pressed_digit
 
 
@@ -180,7 +183,7 @@ def main():
     start_time = time.time()
     while True:
         h_k = handle_keys()
-        if h_k and int(h_k) == -1:
+        if h_k == 'enter':
             if int(num_1.value) * int(num_2.value) == int(answer.value):
                 check_text.value = 'Правильно!'
                 check_text.color = GREEN
@@ -216,11 +219,15 @@ def main():
             display_write(screen, task)
             draw_buttons(buttons_list, screen)
             start_time = time.time()
-        if h_k and int(h_k) >= 0:
+        if h_k and h_k.isdigit() and int(h_k) >= 0:
             if answer.value.isdigit():
                 answer.value += h_k
             else:
                 answer.value = h_k
+            display_write(screen, task)
+            draw_buttons(buttons_list, screen)
+        if h_k == 'backspace' and len(answer.value) > 0:
+            answer.value = answer.value[:-1]
             display_write(screen, task)
             draw_buttons(buttons_list, screen)
 
