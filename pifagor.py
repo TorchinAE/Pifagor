@@ -2,6 +2,7 @@ import time
 import pygame
 from itertools import combinations
 from random import shuffle
+from collections import defaultdict
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 # Цвет фона - черный.
@@ -33,7 +34,6 @@ class Number():
         self.coordinate = coordinate
         self.height_number = HEIGH_NUM
         self.color = color
-        self.len_num = len(str(value))
 
     def delta(self, x=0, y=0):
         self.coordinate = (self.coordinate[0]+x, self.coordinate[1]+y)
@@ -45,7 +45,6 @@ class Number():
         text = font.render(str(self.value), True, self.color)
         text_rect = text.get_rect(topleft=(self.coordinate))
         screen.blit(text, text_rect)
-        # pygame.display.update()
 
 
 class Button():
@@ -60,7 +59,7 @@ class Button():
         self.flag = [flag for _ in range(2, 10)]
         self.width = width
         self.height = height
-        self.answer = [(x, 0) for x in range(2, 10)]
+        self.incorrect_answer = defaultdict(int)
 
     def __str__(self) -> str:
         return str(self.name) + ' - ' + ', '.join(str(x) for x in self.flag)
@@ -140,8 +139,12 @@ def draw_buttons(buttons_list, screen):
 
 def save_answer(buttons_list, answer, correct_flag):
     num = answer[0]-2
-    buttons_list[num].flag[answer[1]-2] = correct_flag
-    print(buttons_list[num])
+    if correct_flag:
+        buttons_list[num].flag[answer[1]-2] = correct_flag
+        print(buttons_list[num])
+    else:
+        buttons_list[num].incorrect_answer[answer[1]] += 1
+        print(f'ошибка {answer[0]} +1', buttons_list[num].incorrect_answer)
 
 
 def main():
@@ -192,6 +195,7 @@ def main():
                 check_text.color = RED
                 combinations_numbers.append(pop_num)
                 print('append')
+                save_answer(buttons_list, (num_1.value, num_2.value), False)
                 time_delay = 2000
             # Вывод ответа.
             check_text_answer.value += f'{num_1.value} x {num_2.value} = '
