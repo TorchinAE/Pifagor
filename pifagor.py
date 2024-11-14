@@ -57,24 +57,24 @@ class Button():
         self.name = name
         self.coordinats = coordinats
         self.color = color
-        self.flag = flag
+        self.flag = [flag for _ in range(2, 10)]
         self.width = width
         self.height = height
         self.answer = [(x, 0) for x in range(2, 10)]
 
+    def __str__(self) -> str:
+        return str(self.name) + ' - ' + ', '.join(str(x) for x in self.flag)
+
     def draw_point(self, screen):
-        for point in self.answer:
+        for i, point in enumerate(self.flag):
             circle_center = (self.coordinats[0] + self.width // 2,
-                             self.coordinats[1] - 10 * point[0])
+                             self.coordinats[1] - 10 * i-10)
             circle_radius = 3
-            if self.flag:
+            if point is True:
                 color = GREEN
             else:
                 color = RED
             pygame.draw.circle(screen, color, circle_center, circle_radius, 0)
-
-    def change_point(self, flag: bool):
-        self.flag = flag
 
     def draw(self, screen):
         "Отрисовка кнопки."
@@ -125,13 +125,23 @@ def display_write(screen, arr_num: list):
         x.draw(screen)
 
 
-def draw_bottons(buttons_list, screen):
-    "Отрисовка кнопок цифр и пройденных заданий"
-    for x in range(1, 10):
-        btn = Button(name=str(x), coordinats=(x*60, SCREEN_HEIGHT - 80))
+def create_buttons(buttons_list):
+    for x in range(2, 10):
+        btn = Button(name=str(x), coordinats=(x*60-30, SCREEN_HEIGHT - 80))
         buttons_list.append(btn)
-        buttons_list[-1].draw(screen)
+
+
+def draw_buttons(buttons_list, screen):
+    "Отрисовка кнопок цифр и пройденных заданий"
+    for btn in buttons_list:
+        btn.draw(screen)
     pygame.display.update()
+
+
+def save_answer(buttons_list, answer, correct_flag):
+    num = answer[0]-2
+    buttons_list[num].flag[answer[1]-2] = correct_flag
+    print(buttons_list[num])
 
 
 def main():
@@ -140,10 +150,9 @@ def main():
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption('Пифагоровы штаны')
     buttons_list = []
-    draw_bottons(buttons_list, screen)
+    create_buttons(buttons_list)
     set_stop_numbers = []
     set_of_numbers = [x for x in range(2, 10) if x not in set_stop_numbers]*2
-    print(set_of_numbers)
     combinations_numbers = list(combinations(set_of_numbers, 2))
     shuffle(combinations_numbers)
     pop_num = combinations_numbers.pop(0)
@@ -164,12 +173,11 @@ def main():
     check_text_answer = Number('')
     task = [num_1, sign_multiply, num_2, sign_equal, answer, count_question]
     display_write(screen, task)
-    draw_bottons(buttons_list, screen)
+    draw_buttons(buttons_list, screen)
     start_time = time.time()
     while True:
         h_k = handle_keys()
         if h_k and int(h_k) == -1:
-            print(combinations_numbers)
             if int(num_1.value) * int(num_2.value) == int(answer.value):
                 check_text.value = 'Правильно!'
                 check_text.color = GREEN
@@ -178,19 +186,22 @@ def main():
                 if time.time() - start_time > TIME_LIMIT_ANSWER:
                     combinations_numbers.append(pop_num)
                     print('append')
+                save_answer(buttons_list, (num_1.value, num_2.value), True)
             else:
                 check_text.value = 'НЕ Правильно!'
                 check_text.color = RED
                 combinations_numbers.append(pop_num)
                 print('append')
                 time_delay = 2000
+            # Вывод ответа.
             check_text_answer.value += f'{num_1.value} x {num_2.value} = '
             check_text_answer.value += str(int(num_1.value) * int(num_2.value))
             display_write(screen, [check_text, check_text_answer])
-            draw_bottons(buttons_list, screen)
+            draw_buttons(buttons_list, screen)
             pygame.display.update()
             pygame.time.delay(time_delay)
             display_clear(screen)
+            # Новый вопрос.
             check_text_answer.value = ''
             count_question.value = 'Осталось примеров: '
             count_question.value += str(len(combinations_numbers))
@@ -199,7 +210,7 @@ def main():
             num_2.value = pop_num[1]
             answer.value = '?'
             display_write(screen, task)
-            draw_bottons(buttons_list, screen)
+            draw_buttons(buttons_list, screen)
             start_time = time.time()
         if h_k and int(h_k) >= 0:
             if answer.value.isdigit():
@@ -207,7 +218,7 @@ def main():
             else:
                 answer.value = h_k
             display_write(screen, task)
-            draw_bottons(buttons_list, screen)
+            draw_buttons(buttons_list, screen)
 
 
 if __name__ == '__main__':
