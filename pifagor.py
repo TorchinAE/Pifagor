@@ -45,7 +45,48 @@ class Number():
         text = font.render(str(self.value), True, self.color)
         text_rect = text.get_rect(topleft=(self.coordinate))
         screen.blit(text, text_rect)
-        pygame.display.update()
+        # pygame.display.update()
+
+
+class Button():
+    "Класс кнопок."
+
+    def __init__(self, name, coordinats,
+                 flag=False, color=GREEN,
+                 width=50, height=50):
+        self.name = name
+        self.coordinats = coordinats
+        self.color = color
+        self.flag = flag
+        self.width = width
+        self.height = height
+        self.answer = [(x, 0) for x in range(2, 10)]
+
+    def draw_point(self, screen):
+        for point in self.answer:
+            circle_center = (self.coordinats[0] + self.width // 2,
+                             self.coordinats[1] - 10 * point[0])
+            circle_radius = 3
+            if self.flag:
+                color = GREEN
+            else:
+                color = RED
+            pygame.draw.circle(screen, color, circle_center, circle_radius, 0)
+
+    def change_point(self, flag: bool):
+        self.flag = flag
+
+    def draw(self, screen):
+        "Отрисовка кнопки."
+        button_rect = pygame.Rect(self.coordinats[0], self.coordinats[1],
+                                  self.width, self.height)
+        pygame.draw.rect(screen, self.color, button_rect)
+        # Определяем шрифт и текст кнопки
+        font = pygame.font.Font(None, 36)
+        text = font.render(self.name, True, TEXT_COLOR)
+        text_rect = text.get_rect(center=button_rect.center)
+        screen.blit(text, text_rect)
+        self.draw_point(screen)
 
 
 def handle_keys() -> None:
@@ -57,8 +98,8 @@ def handle_keys() -> None:
             raise SystemExit
         elif event.type == pygame.MOUSEBUTTONDOWN:
             mouse_pos = pygame.mouse.get_pos()
-            if button_rect.collidepoint(mouse_pos):
-                print("Кнопка была нажата!")
+            """ if button_rect.collidepoint(mouse_pos):
+                print("Кнопка была нажата!")"""
         elif event.type == pygame.KEYDOWN:
             if event.key in (NUMBER_KEYBOARD_HI):
                 pressed_digit = pygame.key.name(event.key)
@@ -78,33 +119,29 @@ def display_clear(screen) -> None:
 
 
 def display_write(screen, arr_num: list):
+    "Отрисовка вопроса"
     display_clear(screen)
     for x in arr_num:
         x.draw(screen)
 
 
-def button_draw(screen, name, coord,
-                button_width=50, button_height=50):
-    button_color = (255, 0, 0)  # Красный цвет
-    button_rect = pygame.Rect(coord[0], coord[1], button_width, button_height)
-    pygame.draw.rect(screen, button_color, button_rect)  # Рисуем кнопку
-
-    # Определяем шрифт и текст кнопки
-    font = pygame.font.Font(None, 36) 
-    text = font.render(name, True, (255, 255, 255)) 
-    text_rect = text.get_rect(center=button_rect.center) 
-    screen.blit(text, text_rect)
+def draw_bottons(buttons_list, screen):
+    "Отрисовка кнопок цифр и пройденных заданий"
+    for x in range(1, 10):
+        btn = Button(name=str(x), coordinats=(x*60, SCREEN_HEIGHT - 80))
+        buttons_list.append(btn)
+        buttons_list[-1].draw(screen)
     pygame.display.update()
+
 
 def main():
     # Настройка игрового окна:
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption('Пифагоровы штаны')
-    for x in range(1,10):
-        button_draw(screen, str(x), (x*60, SCREEN_HEIGHT - 80))
-    pygame.time.delay(2000)
-    set_stop_numbers = [2]
+    buttons_list = []
+    draw_bottons(buttons_list, screen)
+    set_stop_numbers = []
     set_of_numbers = [x for x in range(2, 10) if x not in set_stop_numbers]*2
     print(set_of_numbers)
     combinations_numbers = list(combinations(set_of_numbers, 2))
@@ -127,6 +164,7 @@ def main():
     check_text_answer = Number('')
     task = [num_1, sign_multiply, num_2, sign_equal, answer, count_question]
     display_write(screen, task)
+    draw_bottons(buttons_list, screen)
     start_time = time.time()
     while True:
         h_k = handle_keys()
@@ -147,8 +185,10 @@ def main():
                 print('append')
                 time_delay = 2000
             check_text_answer.value += f'{num_1.value} x {num_2.value} = '
-            check_text_answer.value += str(int(num_1.value) * int(num_2.value))    
+            check_text_answer.value += str(int(num_1.value) * int(num_2.value))
             display_write(screen, [check_text, check_text_answer])
+            draw_bottons(buttons_list, screen)
+            pygame.display.update()
             pygame.time.delay(time_delay)
             display_clear(screen)
             check_text_answer.value = ''
@@ -159,6 +199,7 @@ def main():
             num_2.value = pop_num[1]
             answer.value = '?'
             display_write(screen, task)
+            draw_bottons(buttons_list, screen)
             start_time = time.time()
         if h_k and int(h_k) >= 0:
             if answer.value.isdigit():
@@ -166,6 +207,7 @@ def main():
             else:
                 answer.value = h_k
             display_write(screen, task)
+            draw_bottons(buttons_list, screen)
 
 
 if __name__ == '__main__':
