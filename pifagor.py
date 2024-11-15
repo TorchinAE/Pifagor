@@ -24,7 +24,7 @@ NUMBER_KEYBOARD = [1073741922, 1073741913, 1073741914, 1073741915, 1073741916,
                    1073741917, 1073741918, 1073741919, 1073741920, 1073741921]
 NUMBER_KEYBOARD_HI = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
 # не играемые цифры
-set_stop_numbers = [2, 7, 8, 9,4,6]
+set_stop_numbers = [3,4,5,6,7,8,9]
 
 
 class Number():
@@ -157,6 +157,16 @@ def save_answer(buttons_list, answer, correct_flag):
         print(f'ошибка {answer[0]} +1', buttons_list[num].incorrect_answer)
 
 
+def finish(screen):
+    text1 = Number('Молодец!', (SCREEN_WIDTH//4 + 15, SCREEN_HEIGHT//2 - 50))
+    text2 = Number('Игра закончена.', (SCREEN_WIDTH//6, SCREEN_HEIGHT//2))
+    text1.draw(screen)
+    text2.draw(screen)
+    pygame.display.update()
+    pygame.time.delay(3000)
+    pygame.quit()
+    raise SystemExit
+
 def main():
     # Настройка игрового окна:
     pygame.init()
@@ -164,7 +174,6 @@ def main():
     pygame.display.set_caption('Пифагоровы штаны')
     buttons_list = []
     create_buttons(buttons_list)
-    
     set_of_numbers = [x for x in range(2, 10) if x not in set_stop_numbers]
     combinations_numbers = list(product(set_of_numbers, range(2, 9)))
     shuffle(combinations_numbers)
@@ -216,6 +225,8 @@ def main():
             pygame.time.delay(time_delay)
             display_clear(screen)
             # Новый вопрос.
+            if len(combinations_numbers) == 0:
+                finish(screen)
             check_text_answer.value = ''
             count_question.value = 'Осталось примеров: '
             count_question.value += str(len(combinations_numbers))
