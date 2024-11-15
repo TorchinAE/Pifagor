@@ -1,6 +1,6 @@
 import time
 import pygame
-from itertools import combinations
+from itertools import product
 from random import shuffle
 from collections import defaultdict
 
@@ -157,9 +157,10 @@ def main():
     pygame.display.set_caption('Пифагоровы штаны')
     buttons_list = []
     create_buttons(buttons_list)
-    set_stop_numbers = []
-    set_of_numbers = [x for x in range(2, 10) if x not in set_stop_numbers]*2
-    combinations_numbers = list(combinations(set_of_numbers, 2))
+    set_stop_numbers = [3,4,5,6,7,8]
+    set_of_numbers = [x for x in range(2, 10) if x not in set_stop_numbers]
+    combinations_numbers = list(product(set_of_numbers, range(2, 9)))
+    print(combinations_numbers)
     shuffle(combinations_numbers)
     pop_num = combinations_numbers.pop(0)
     num_1 = Number(pop_num[0])
@@ -183,7 +184,7 @@ def main():
     start_time = time.time()
     while True:
         h_k = handle_keys()
-        if h_k == 'enter':
+        if h_k == 'enter' and answer.value.isdigit():
             if int(num_1.value) * int(num_2.value) == int(answer.value):
                 check_text.value = 'Правильно!'
                 check_text.color = GREEN
