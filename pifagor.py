@@ -15,14 +15,16 @@ TIME_LIMIT_ANSWER = 4
 DELTA_X = 30
 # Высота шрифта.
 HEIGH_NUM = 80
-# Зелёный
+# Цвета
 GREEN = (0, 128, 0)
-# Красный
 RED = (255, 0, 0)
-
+GREY = (128, 128, 128)
+# Коды цифр
 NUMBER_KEYBOARD = [1073741922, 1073741913, 1073741914, 1073741915, 1073741916,
                    1073741917, 1073741918, 1073741919, 1073741920, 1073741921]
 NUMBER_KEYBOARD_HI = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
+# не играемые цифры
+set_stop_numbers = [2, 7, 8, 9,4,6]
 
 
 class Number():
@@ -65,6 +67,7 @@ class Button():
         return str(self.name) + ' - ' + ', '.join(str(x) for x in self.flag)
 
     def draw_point(self, screen):
+        global set_stop_numbers
         for i, point in enumerate(self.flag):
             circle_center = (self.coordinats[0] + self.width // 2,
                              self.coordinats[1] - 10 * i-10)
@@ -73,10 +76,15 @@ class Button():
                 color = GREEN
             else:
                 color = RED
+            if int(self.name) in set_stop_numbers:
+                color = GREY
             pygame.draw.circle(screen, color, circle_center, circle_radius, 0)
 
     def draw(self, screen):
         "Отрисовка кнопки."
+        global set_stop_numbers
+        if int(self.name) in set_stop_numbers:
+            self.color = GREY
         button_rect = pygame.Rect(self.coordinats[0], self.coordinats[1],
                                   self.width, self.height)
         pygame.draw.rect(screen, self.color, button_rect)
@@ -100,7 +108,6 @@ def handle_keys() -> None:
             """ if button_rect.collidepoint(mouse_pos):
                 print("Кнопка была нажата!")"""
         elif event.type == pygame.KEYDOWN:
-            print(pygame.key.name(event.key) )
             if event.key in (NUMBER_KEYBOARD_HI):
                 pressed_digit = pygame.key.name(event.key)
             elif event.key in NUMBER_KEYBOARD:
@@ -157,7 +164,7 @@ def main():
     pygame.display.set_caption('Пифагоровы штаны')
     buttons_list = []
     create_buttons(buttons_list)
-    set_stop_numbers = [2,7,8,9]
+    
     set_of_numbers = [x for x in range(2, 10) if x not in set_stop_numbers]
     combinations_numbers = list(product(set_of_numbers, range(2, 9)))
     shuffle(combinations_numbers)
