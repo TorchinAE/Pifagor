@@ -24,7 +24,7 @@ NUMBER_KEYBOARD = [1073741922, 1073741913, 1073741914, 1073741915, 1073741916,
                    1073741917, 1073741918, 1073741919, 1073741920, 1073741921]
 NUMBER_KEYBOARD_HI = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
 # не играемые цифры
-set_stop_numbers = [3,4,5,6,7,8,9]
+set_stop_numbers = [3, 4, 5, 6, 7, 8, 9]
 
 
 class Number():
@@ -156,6 +156,8 @@ def save_answer(buttons_list, answer, correct_flag):
         buttons_list[num].incorrect_answer[answer[1]] += 1
         print(f'ошибка {answer[0]} +1', buttons_list[num].incorrect_answer)
 
+def start_menu(screen):
+    
 
 def finish(screen):
     text1 = Number('Молодец!', (SCREEN_WIDTH//4 + 15, SCREEN_HEIGHT//2 - 50))
@@ -166,6 +168,7 @@ def finish(screen):
     pygame.time.delay(3000)
     pygame.quit()
     raise SystemExit
+
 
 def main():
     # Настройка игрового окна:
