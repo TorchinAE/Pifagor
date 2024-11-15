@@ -157,10 +157,9 @@ def main():
     pygame.display.set_caption('Пифагоровы штаны')
     buttons_list = []
     create_buttons(buttons_list)
-    set_stop_numbers = [3,4,5,6,7,8]
+    set_stop_numbers = [2,7,8,9]
     set_of_numbers = [x for x in range(2, 10) if x not in set_stop_numbers]
     combinations_numbers = list(product(set_of_numbers, range(2, 9)))
-    print(combinations_numbers)
     shuffle(combinations_numbers)
     pop_num = combinations_numbers.pop(0)
     num_1 = Number(pop_num[0])
@@ -200,7 +199,7 @@ def main():
                 combinations_numbers.append(pop_num)
                 print('append')
                 save_answer(buttons_list, (num_1.value, num_2.value), False)
-                time_delay = 2000
+                time_delay = 2500
             # Вывод ответа.
             check_text_answer.value += f'{num_1.value} x {num_2.value} = '
             check_text_answer.value += str(int(num_1.value) * int(num_2.value))
@@ -213,9 +212,10 @@ def main():
             check_text_answer.value = ''
             count_question.value = 'Осталось примеров: '
             count_question.value += str(len(combinations_numbers))
-            pop_num = combinations_numbers.pop(0)
-            num_1.value = pop_num[0]
-            num_2.value = pop_num[1]
+            if check_text.value == 'Правильно!':
+                pop_num = combinations_numbers.pop(0)
+                num_1.value = pop_num[0]
+                num_2.value = pop_num[1]
             answer.value = '?'
             display_write(screen, task)
             draw_buttons(buttons_list, screen)
