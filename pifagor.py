@@ -1,4 +1,5 @@
 import time
+import datetime
 import pygame
 from itertools import product
 from random import shuffle
@@ -70,14 +71,14 @@ class Button():
         return str(self.name) + ' - ' + ', '.join(str(x) for x in self.flag)
 
     @staticmethod
-    def write_text(text_input, button_rect, screen):
+    def write_text(text_input, button_rect, screen) -> None:
         # Определяем шрифт и текст кнопки
         font = pygame.font.Font(None, 36)
         text = font.render(text_input, True, TEXT_COLOR)
         text_rect = text.get_rect(center=button_rect.center)
         screen.blit(text, text_rect)
 
-    def draw_point(self, screen):
+    def draw_point(self, screen) -> None:
         for i in range(len(self.flag)):
             circle_center = (self.coordinats[0] + self.width // 2,
                              self.coordinats[1] - 10 * i-10)
@@ -91,11 +92,29 @@ class Button():
             pygame.draw.circle(screen, color,
                                circle_center, circle_radius, 0)
 
-    def draw(self, screen):
+    def draw(self, screen) -> None:
         "Отрисовка кнопки."
         global set_stop_TextStings
         pygame.draw.rect(screen, self.color, self.rect)
         self.write_text(self.name, self.rect, screen)
+
+    @staticmethod
+    def report(buttons_list: list):
+        report_string = ''
+        for but in buttons_list:
+            if but.incorrect_answer:
+                report_string += f'с {but.name} ошибки на '
+                report_string += f'{dict(but.incorrect_answer)}\n'
+        with open('report.txt', 'a', encoding='utf-8') as f:
+            f.write('\n\n')
+            f.write('\n*******************************\n')
+            f.write('Отчет об ошибках: ')
+            f.write(datetime.datetime.now().date().strftime('%d/%m/%y'))
+            f.write(' ')
+            f.write(datetime.datetime.now().time().strftime('%H:%M:%S'))
+            f.write('\n{число : кол-во раз ошибся}\n')
+            f.write(report_string)
+            f.write('\n*******************************\n')
 
 
 def handle_keys(buttons_list: list, screen) -> str:
@@ -104,6 +123,7 @@ def handle_keys(buttons_list: list, screen) -> str:
     pressed_digit = ''
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
+            Button.report(buttons_list)
             pygame.quit()
             raise SystemExit
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -204,6 +224,8 @@ def finish(screen):
     text2.draw(screen)
     pygame.display.update()
     pygame.time.delay(3000)
+    global buttons_list
+    Button.report(buttons_list)
     pygame.quit()
     raise SystemExit
 
