@@ -6,6 +6,7 @@ import pygame
 from itertools import product
 from random import shuffle
 from collections import defaultdict
+from bot import send_message
 
 SCREEN_WIDTH, SCREEN_HEIGHT = 640, 480
 # Цвет фона - черный.
@@ -29,6 +30,10 @@ TextSting_KEYBOARD = [1073741922, 1073741913, 1073741914, 1073741915,
 TextSting_KEYBOARD_HI = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
 # не играемые цифры
 set_stop_text_trings: list = []
+
+with open('passwords.txt', 'r') as f:
+    TOKEN = f.readline().strip()
+    CHAT_ID = f.readline().strip()
 
 
 class TextSting():
@@ -109,32 +114,37 @@ class Button():
         self.write_text(self.name, self.rect, screen)
 
     @staticmethod
-    def report(buttons_list: list):
+    def report(buttons_list: list, count_comb: int):
         """Отчет по резульатам игры."""
-        report_string = ''
-        for but in buttons_list:
-            if but.incorrect_answer:
-                report_string += f'с {but.name} ошибки на '
-                report_string += f'{dict(but.incorrect_answer)}\n'
+        report_str = ''
         with open('report.txt', 'a', encoding='utf-8') as f:
-            f.write('\n\n')
-            f.write('\n**********************************\n')
-            f.write('Отчет об ошибках: ')
-            f.write(datetime.datetime.now().date().strftime('%d/%m/%y'))
-            f.write(' ')
-            f.write(datetime.datetime.now().time().strftime('%H:%M:%S'))
-            f.write('\n{число : кол-во ошибок}\n')
-            f.write(report_string)
-            f.write('\n**********************************\n')
+            report_str = ''
+            report_str += '\n\n'
+            report_str += '\n**********************************\n'
+            report_str += 'Отчет об ошибках: '
+            report_str += datetime.datetime.now().date().strftime('%d/%m/%y')
+            report_str += ' '
+            report_str += datetime.datetime.now().time().strftime('%H:%M:%S')
+            report_str += '\nНе используемые цифры: '
+            report_str += ', '.join([str(x) for x in set_stop_text_trings])
+            report_str += '\n{ число : кол-во ошибок }'
+            for but in buttons_list:
+                if but.incorrect_answer:
+                    report_str += f'\nс {but.name}-й ошибки на '
+                    report_str += f'{dict(but.incorrect_answer)}'
+            report_str += f'\nОсталось не решённых {count_comb} примеров'
+            report_str += '\n**********************************\n'
+            f.write(report_str)
+            send_message(TOKEN, CHAT_ID, report_str)
 
 
-def handle_keys(buttons_list: list, screen) -> str:
+def handle_keys(buttons_list: list, count_comb, screen) -> str:
     """Функция обработки действий пользователя."""
     global r
     pressed_digit = ''
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
-            Button.report(buttons_list)
+            Button.report(buttons_list, count_comb)
             pygame.quit()
             raise SystemExit
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -220,7 +230,7 @@ def start_menu(buttons_list, screen):
     draw_buttons(buttons_list, screen)
     pygame.display.update()
     while True:
-        if handle_keys(buttons_list, screen) == 'СТАРТ!':
+        if handle_keys(buttons_list, [], screen) == 'СТАРТ!':
             print('buttons_list', [x.name for x in buttons_list])
             buttons_list.pop(-1)
             print('buttons_list 2', [x.name for x in buttons_list])
@@ -240,7 +250,7 @@ def finish(screen):
     pygame.display.update()
     pygame.time.delay(3000)
     global buttons_list
-    Button.report(buttons_list)
+    Button.report(buttons_list, 0)
     pygame.quit()
     raise SystemExit
 
@@ -283,7 +293,7 @@ def main():
     draw_buttons(buttons_list, screen)
     start_time = time.time()
     while True:
-        h_k = handle_keys(buttons_list, screen)
+        h_k = handle_keys(buttons_list, count_comb, screen)
         if h_k == 'enter' and answer.value.isdigit():
             if int(num_1.value) * int(num_2.value) == int(answer.value):
                 check_text.value = 'Правильно!'
