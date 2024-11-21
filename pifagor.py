@@ -1,3 +1,5 @@
+"""Пифагор. Приложени для повторения таблицы умножения."""
+
 import time
 import datetime
 import pygame
@@ -26,20 +28,24 @@ TextSting_KEYBOARD = [1073741922, 1073741913, 1073741914, 1073741915,
                       1073741920, 1073741921]
 TextSting_KEYBOARD_HI = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
 # не играемые цифры
-set_stop_TextStings = []
+set_stop_text_trings: list = []
 
 
 class TextSting():
+    """Класс вывода текста."""
+
     def __init__(self,
                  value=0,
                  coordinate=(SCREEN_WIDTH/3-10, SCREEN_HEIGHT/2-HEIGH_NUM/2),
                  color=TEXT_COLOR):
+        """Инициация класса."""
         self.value = value
         self.coordinate = coordinate
         self.height_TextSting = HEIGH_NUM
         self.color = color
 
     def delta(self, x=0, y=0):
+        """Смещение координат для текста."""
         self.coordinate = (self.coordinate[0]+x, self.coordinate[1]+y)
 
     def draw(self, screen):
@@ -52,11 +58,12 @@ class TextSting():
 
 
 class Button():
-    "Класс кнопок."
+    """Класс кнопок."""
 
     def __init__(self, name, coordinats,
                  flag=False, color=GREEN,
                  width=50, height=50):
+        """Инициация класса."""
         self.name = name
         self.coordinats = coordinats
         self.color = color
@@ -68,10 +75,12 @@ class Button():
         self.block = False
 
     def __str__(self) -> str:
+        """Строковое представление."""
         return str(self.name) + ' - ' + ', '.join(str(x) for x in self.flag)
 
     @staticmethod
     def write_text(text_input, button_rect, screen) -> None:
+        """Отрисовка текста."""
         # Определяем шрифт и текст кнопки
         font = pygame.font.Font(None, 36)
         text = font.render(text_input, True, TEXT_COLOR)
@@ -79,6 +88,7 @@ class Button():
         screen.blit(text, text_rect)
 
     def draw_point(self, screen) -> None:
+        """Отрисовка точек правильных ответов."""
         for i in range(len(self.flag)):
             circle_center = (self.coordinats[0] + self.width // 2,
                              self.coordinats[1] - 10 * i-10)
@@ -87,19 +97,20 @@ class Button():
                 color = GREEN
             else:
                 color = RED
-            if self.name in set_stop_TextStings:
+            if self.name in set_stop_text_trings:
                 color = GREY
             pygame.draw.circle(screen, color,
                                circle_center, circle_radius, 0)
 
     def draw(self, screen) -> None:
-        "Отрисовка кнопки."
-        global set_stop_TextStings
+        """Отрисовка кнопки."""
+        global r
         pygame.draw.rect(screen, self.color, self.rect)
         self.write_text(self.name, self.rect, screen)
 
     @staticmethod
     def report(buttons_list: list):
+        """Отчет по резульатам игры."""
         report_string = ''
         for but in buttons_list:
             if but.incorrect_answer:
@@ -107,19 +118,19 @@ class Button():
                 report_string += f'{dict(but.incorrect_answer)}\n'
         with open('report.txt', 'a', encoding='utf-8') as f:
             f.write('\n\n')
-            f.write('\n*******************************\n')
+            f.write('\n**********************************\n')
             f.write('Отчет об ошибках: ')
             f.write(datetime.datetime.now().date().strftime('%d/%m/%y'))
             f.write(' ')
             f.write(datetime.datetime.now().time().strftime('%H:%M:%S'))
-            f.write('\n{число : кол-во раз ошибся}\n')
+            f.write('\n{число : кол-во ошибок}\n')
             f.write(report_string)
-            f.write('\n*******************************\n')
+            f.write('\n**********************************\n')
 
 
 def handle_keys(buttons_list: list, screen) -> str:
     """Функция обработки действий пользователя."""
-    global set_stop_TextStings
+    global r
     pressed_digit = ''
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -133,10 +144,10 @@ def handle_keys(buttons_list: list, screen) -> str:
                     print("Кнопка была нажата!", but.name)
                     if but.name != 'СТАРТ!' and but.color == GREEN:
                         but.color = GREY
-                        set_stop_TextStings.append(int(but.name))
+                        set_stop_text_trings.append(int(but.name))
                     elif but.name != 'СТАРТ!' and but.color == GREY:
                         but.color = GREEN
-                        set_stop_TextStings.remove(int(but.name))
+                        set_stop_text_trings.remove(int(but.name))
                     if but.name == 'СТАРТ!':
                         print("Кнопка была нажата выхода", but.name)
                         return but.name
@@ -164,28 +175,30 @@ def display_clear(screen) -> None:
 
 
 def display_write(screen, arr_num: list) -> None:
-    "Отрисовка вопроса"
+    """Отрисовка вопроса."""
     display_clear(screen)
     for x in arr_num:
         x.draw(screen)
 
 
 def create_buttons(buttons_list: list) -> None:
+    """Cоздание списка кнопок."""
     for x in range(2, 10):
         btn = Button(name=str(x), coordinats=(x*60-30, SCREEN_HEIGHT - 80))
         buttons_list.append(btn)
 
 
 def draw_buttons(buttons_list: list, screen) -> None:
-    "Отрисовка кнопок цифр и пройденных заданий"
+    """Отрисовка кнопок цифр и пройденных заданий."""
     for btn in buttons_list:
         btn.draw(screen)
-        if btn.name not in set_stop_TextStings and btn.name != 'СТАРТ!':
+        if btn.name not in set_stop_text_trings and btn.name != 'СТАРТ!':
             btn.draw_point(screen)
     pygame.display.update()
 
 
 def save_answer(buttons_list, answer, correct_flag: bool) -> None:
+    """Сохранение ответа в свойства."""
     num = answer[0]-2
     if correct_flag:
         buttons_list[num].flag[answer[1]-2] = correct_flag
@@ -196,6 +209,7 @@ def save_answer(buttons_list, answer, correct_flag: bool) -> None:
 
 
 def start_menu(buttons_list, screen):
+    """Стартовое меню."""
     text = TextSting('Выбери цифры', (SCREEN_WIDTH//6, SCREEN_HEIGHT//4 - 50))
     text.draw(screen)
     btn = Button('СТАРТ!',
@@ -217,6 +231,7 @@ def start_menu(buttons_list, screen):
 
 
 def finish(screen):
+    """Финишная заставка."""
     text1 = TextSting(
         'Молодец!', (SCREEN_WIDTH//4 + 15, SCREEN_HEIGHT//2 - 50))
     text2 = TextSting('Игра закончена.', (SCREEN_WIDTH//6, SCREEN_HEIGHT//2))
@@ -231,27 +246,28 @@ def finish(screen):
 
 
 def main():
+    """Главный цикл."""
     # Настройка игрового окна:
-    global set_stop_TextStings
+    global r
     pygame.init()
     screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
     pygame.display.set_caption('Пифагоровы штаны')
     buttons_list = []
     create_buttons(buttons_list)
     start_menu(buttons_list, screen)
-    set_of_TextStings = [x for x in range(2, 10)
-                         if x not in set_stop_TextStings]
-    print('set_of_TextStings', set_of_TextStings)
-    combinations_TextStings = list(product(set_of_TextStings, range(2, 10)))
-    print(combinations_TextStings)
-    shuffle(combinations_TextStings)
-    pop_num = combinations_TextStings.pop(0)
+    set_of_text_stings = [x for x in range(2, 10)
+                          if x not in set_stop_text_trings]
+    print('set_of_text_stings', set_of_text_stings)
+    combinations_text_strings = list(product(set_of_text_stings, range(2, 10)))
+    print(combinations_text_strings)
+    shuffle(combinations_text_strings)
+    pop_num = combinations_text_strings.pop(0)
     num_1 = TextSting(pop_num[0])
     sign_multiply = TextSting('x')
     num_2 = TextSting(pop_num[1])
     sign_equal = TextSting('=')
     answer = TextSting('?')
-    count_comb = len(combinations_TextStings)
+    count_comb = len(combinations_text_strings)
     count_question = TextSting(f'Осталось примеров: {count_comb}',
                                (SCREEN_WIDTH - 260, 10))
     count_question.height_TextSting = 30
@@ -275,13 +291,13 @@ def main():
                 time_delay = 1000
                 print(time.time() - start_time)
                 if time.time() - start_time > TIME_LIMIT_ANSWER:
-                    combinations_TextStings.append(pop_num)
+                    combinations_text_strings.append(pop_num)
                     print('append')
                 save_answer(buttons_list, (num_1.value, num_2.value), True)
             else:
                 check_text.value = 'НЕ Правильно!'
                 check_text.color = RED
-                combinations_TextStings.append(pop_num)
+                combinations_text_strings.append(pop_num)
                 print('append')
                 save_answer(buttons_list, (num_1.value, num_2.value), False)
                 time_delay = 2500
@@ -294,13 +310,13 @@ def main():
             pygame.time.delay(time_delay)
             display_clear(screen)
             # Новый вопрос.
-            if len(combinations_TextStings) == 0:
+            if len(combinations_text_strings) == 0:
                 finish(screen)
             check_text_answer.value = ''
             count_question.value = 'Осталось примеров: '
-            count_question.value += str(len(combinations_TextStings))
+            count_question.value += str(len(combinations_text_strings))
             if check_text.value == 'Правильно!':
-                pop_num = combinations_TextStings.pop(0)
+                pop_num = combinations_text_strings.pop(0)
                 num_1.value = pop_num[0]
                 num_2.value = pop_num[1]
             answer.value = '?'
