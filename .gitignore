@@ -1,2 +1,5 @@
 passwords.txt
 report.txt
+build/
+dist/
+pifagor.spec

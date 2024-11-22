@@ -30,6 +30,8 @@ TextSting_KEYBOARD = [1073741922, 1073741913, 1073741914, 1073741915,
 TextSting_KEYBOARD_HI = [48, 49, 50, 51, 52, 53, 54, 55, 56, 57]
 # не играемые цифры
 set_stop_text_trings: list = []
+#  Показыввать системные сообщения
+SISTEM_INFO = False
 
 with open('passwords.txt', 'r') as f:
     TOKEN = f.readline().strip()
@@ -136,6 +138,7 @@ class Button():
             report_str += '\n**********************************\n'
             f.write(report_str)
             send_message(TOKEN, CHAT_ID, report_str)
+            # send_message(TOKEN, CHAT_ID2, report_str)
 
 
 def handle_keys(buttons_list: list, count_comb, screen) -> str:
@@ -151,7 +154,8 @@ def handle_keys(buttons_list: list, count_comb, screen) -> str:
             mouse_pos = pygame.mouse.get_pos()
             for but in buttons_list:
                 if but.block is False and but.rect.collidepoint(mouse_pos):
-                    print("Кнопка была нажата!", but.name)
+                    if SISTEM_INFO:
+                        print("Кнопка была нажата!", but.name)
                     if but.name != 'СТАРТ!' and but.color == GREEN:
                         but.color = GREY
                         set_stop_text_trings.append(int(but.name))
@@ -159,7 +163,8 @@ def handle_keys(buttons_list: list, count_comb, screen) -> str:
                         but.color = GREEN
                         set_stop_text_trings.remove(int(but.name))
                     if but.name == 'СТАРТ!':
-                        print("Кнопка была нажата выхода", but.name)
+                        if SISTEM_INFO:
+                            print("Кнопка была нажата выхода", but.name)
                         return but.name
                     but.draw(screen)
                     pygame.display.update(but.rect)
@@ -212,10 +217,12 @@ def save_answer(buttons_list, answer, correct_flag: bool) -> None:
     num = answer[0]-2
     if correct_flag:
         buttons_list[num].flag[answer[1]-2] = correct_flag
-        print(buttons_list[num])
+        if SISTEM_INFO:
+            print(buttons_list[num])
     else:
         buttons_list[num].incorrect_answer[answer[1]] += 1
-        print(f'ошибка {answer[0]} +1', buttons_list[num].incorrect_answer)
+        if SISTEM_INFO:
+            print(f'ошибка {answer[0]} +1', buttons_list[num].incorrect_answer)
 
 
 def start_menu(buttons_list, screen):
@@ -231,9 +238,11 @@ def start_menu(buttons_list, screen):
     pygame.display.update()
     while True:
         if handle_keys(buttons_list, [], screen) == 'СТАРТ!':
-            print('buttons_list', [x.name for x in buttons_list])
+            if SISTEM_INFO:
+                print('buttons_list', [x.name for x in buttons_list])
             buttons_list.pop(-1)
-            print('buttons_list 2', [x.name for x in buttons_list])
+            if SISTEM_INFO:
+                print('buttons_list 2', [x.name for x in buttons_list])
             for btn in buttons_list:
                 btn.block = True
             display_clear(screen)
@@ -267,9 +276,11 @@ def main():
     start_menu(buttons_list, screen)
     set_of_text_stings = [x for x in range(2, 10)
                           if x not in set_stop_text_trings]
-    print('set_of_text_stings', set_of_text_stings)
+    if SISTEM_INFO:
+        print('set_of_text_stings', set_of_text_stings)
     combinations_text_strings = list(product(set_of_text_stings, range(2, 10)))
-    print(combinations_text_strings)
+    if SISTEM_INFO:
+        print(combinations_text_strings)
     shuffle(combinations_text_strings)
     pop_num = combinations_text_strings.pop(0)
     num_1 = TextSting(pop_num[0])
@@ -299,16 +310,19 @@ def main():
                 check_text.value = 'Правильно!'
                 check_text.color = GREEN
                 time_delay = 1000
-                print(time.time() - start_time)
+                if SISTEM_INFO:
+                    print(time.time() - start_time)
                 if time.time() - start_time > TIME_LIMIT_ANSWER:
                     combinations_text_strings.append(pop_num)
-                    print('append')
+                    if SISTEM_INFO:
+                        print('append')
                 save_answer(buttons_list, (num_1.value, num_2.value), True)
             else:
                 check_text.value = 'НЕ Правильно!'
                 check_text.color = RED
                 combinations_text_strings.append(pop_num)
-                print('append')
+                if SISTEM_INFO:
+                    print('append')
                 save_answer(buttons_list, (num_1.value, num_2.value), False)
                 time_delay = 2500
             # Вывод ответа.
