@@ -36,6 +36,7 @@ SISTEM_INFO = False
 with open('passwords.txt', 'r') as f:
     TOKEN = f.readline().strip()
     CHAT_ID = f.readline().strip()
+    CHAT_ID2 = f.readline().strip()
 
 
 class TextSting():
@@ -138,7 +139,7 @@ class Button():
             report_str += '\n**********************************\n'
             f.write(report_str)
             send_message(TOKEN, CHAT_ID, report_str)
-            # send_message(TOKEN, CHAT_ID2, report_str)
+            send_message(TOKEN, CHAT_ID2, report_str)
 
 
 def handle_keys(buttons_list: list, count_comb, screen) -> str:
